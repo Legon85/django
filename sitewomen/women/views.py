@@ -1,5 +1,8 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, \
+    HttpResponsePermanentRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
@@ -22,6 +25,7 @@ class WomenHome(DataMixin, ListView):
         return Women.published.all().select_related('cat')
 
 
+@login_required
 def about(request):
     contact_list = Women.published.all()
     paginator = Paginator(contact_list, 3)
@@ -31,7 +35,6 @@ def about(request):
 
     return render(request, 'women/about.html',
                   {'title': 'О сайте', 'page_obj': page_obj})
-
 
 
 class ShowPost(DataMixin, DetailView):
@@ -47,10 +50,15 @@ class ShowPost(DataMixin, DetailView):
         return get_object_or_404(Women.published, slug=self.kwargs[self.slug_url_kwarg])
 
 
-class AddPage(DataMixin, CreateView):
+class AddPage(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'women/addpage.html'
     title_page = 'Добавление статьи'
+
+    def form_valid(self, form):
+        w = form.save(commit=False)
+        w.author = self.request.user
+        return super().form_valid(form)
 
 
 class UpdatePage(DataMixin, UpdateView):
@@ -61,16 +69,12 @@ class UpdatePage(DataMixin, UpdateView):
     title_page = 'Редактирование статьи'
 
 
-
-
-
 def contact(request):
     return HttpResponse("Обратная связь")
 
 
 def login(request):
     return HttpResponse("Авторизация")
-
 
 
 class WomenCategory(DataMixin, ListView):
@@ -100,7 +104,6 @@ class TagPostList(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         tag = TagPost.objects.get(slug=self.kwargs['tag_slug'])
         return self.get_mixin_context(context, title='Тег: ' + tag.tag)
-
 
     def get_queryset(self):
         return Women.published.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')

@@ -10,3 +10,13 @@ class LoginUserForm(AuthenticationForm):
     class Meta:
         model = get_user_model()
         fields = ['username', 'password']
+
+
+class RegisterUserForm(forms.ModelForm):
+    username = forms.CharField(label="Логин")
+    password = forms.CharField(label="Пароль", widget=forms.PasswordInput())
+    password2 = forms.CharField(label="Повтор пароля", widget=forms.PasswordInput())
+    labels = {'email': 'E-mail',
+              'first_name': 'Имя',
+              'last_name': 'Фамилия',
+              }
