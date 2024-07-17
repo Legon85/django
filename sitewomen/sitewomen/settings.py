@@ -138,6 +138,7 @@ LOGIN_URL = 'users:login'
 
 AUTHENTICATION_BACKENDS = [
     'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.vk.VKOAuth2',
     'django.contrib.auth.backends.ModelBackend',
     'users.authentication.EmailAuthBackend',
 ]
@@ -161,6 +162,10 @@ AUTH_USER_MODEL = 'users.User'
 
 SOCIAL_AUTH_GITHUB_KEY = os.getenv('social_auth_github_key')
 SOCIAL_AUTH_GITHUB_SECRET = os.getenv('social_auth_github_secret')
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = '52005093'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = os.getenv('vk_secret')
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
