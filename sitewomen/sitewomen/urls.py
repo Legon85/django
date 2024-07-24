@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
@@ -21,13 +22,10 @@ from django.views.decorators.cache import cache_page
 
 from sitewomen import settings
 from women import views
-
+from women.sitemaps import PostSitemap, CategorySitemap
 from women.views import page_not_found
 
 from django.contrib.sitemaps.views import sitemap
-from women.models import Women
-
-from women.sitemaps import PostSitemap, CategorySitemap
 
 sitemaps = {
     'posts': PostSitemap,
@@ -38,18 +36,23 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('women.urls')),
     path('users/', include('users.urls', namespace='users')),
-    path("__debug__/", include("debug_toolbar.urls")),
+    # path("__debug__/", include("debug_toolbar.urls")),
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('captcha/', include('captcha.urls')),
-    path('sitemap.xml', cache_page(86400)(sitemap), {'sitemaps': sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    path('sitemap.xml', cache_page(86400)(sitemap), {'sitemaps': sitemaps},
+         name="django.contrib.sitemaps.views.sitemap"),
 ]
+
+if settings.ENABLE_DEBUG_TOOLBAR:
+    urlpatterns += [
+        path("__debug__/", include("debug_toolbar.urls")),
+    ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-
 handler404 = page_not_found
-
 
 admin.site.site_header = "Панель администрирования"
 admin.site.index_title = "Известные женщины мира"
